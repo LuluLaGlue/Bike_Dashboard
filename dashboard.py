@@ -41,14 +41,14 @@ def format_df_for_ml(df):
     for col in cols:
         df_ml = one_hot_encoding(df_ml, col)
 
-    target_count = df_ml["count"]
-    target_registered = df_ml["registered"]
-    target_casual = df_ml["casual"]
+    y_count = df_ml["count"]
+    y_registered = df_ml["registered"]
+    y_casual = df_ml["casual"]
     df_ml = df_ml.drop(["casual", "registered", "count"], axis=1)
 
     print(df_ml.head())
 
-    return df_ml, target_count, target_casual, target_registered
+    return df_ml, y_count, y_casual, y_registered
 
 
 def train_reg(X_train, X_test, y_train, y_test, color):
@@ -182,8 +182,7 @@ if __name__ == "__main__":
     with c:
         st.write(fig)
 
-    df_ml, target_count, target_casual, target_registered = format_df_for_ml(
-        df)
+    df_ml, y_count, y_casual, y_registered = format_df_for_ml(df)
 
     st.title("Machine Learning")
     reg_type = st.selectbox("Select Regression Type",
@@ -225,7 +224,7 @@ if __name__ == "__main__":
         with co:
             st.subheader("*Count*")
             X_train_count, X_test_count, y_train_count, y_test_count = train_test_split(
-                df_ml, target_count, test_size=0.25, random_state=42)
+                df_ml, y_count, test_size=0.25, random_state=42)
 
             fig_count, pred_test_count = train_reg(X_train_count, X_test_count,
                                                    y_train_count, y_test_count,
@@ -239,7 +238,7 @@ if __name__ == "__main__":
         with re:
             st.subheader("*Registered*")
             X_train_registered, X_test_registered, y_train_registered, y_test_registered = train_test_split(
-                df_ml, target_registered, test_size=0.25, random_state=42)
+                df_ml, y_registered, test_size=0.25, random_state=42)
             fig_registered, pred_test_registered = train_reg(
                 X_train_registered, X_test_registered, y_train_registered,
                 y_test_registered, "blue")
@@ -252,7 +251,7 @@ if __name__ == "__main__":
         with ca:
             st.subheader("*Casual*")
             X_train_casual, X_test_casual, y_train_casual, y_test_casual = train_test_split(
-                df_ml, target_casual, test_size=0.25, random_state=42)
+                df_ml, y_casual, test_size=0.25, random_state=42)
             fig_casual, pred_test_casual = train_reg(X_train_casual,
                                                      X_test_casual,
                                                      y_train_casual,
