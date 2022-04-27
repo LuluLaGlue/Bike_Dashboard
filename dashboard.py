@@ -6,7 +6,7 @@ import seaborn as sns
 import streamlit as st
 import matplotlib.pyplot as plt
 
-from sklearn.svm import SVR, SVC
+from sklearn.svm import SVR
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
@@ -32,9 +32,9 @@ def one_hot_encoding(data, column):
 def format_df_for_ml(df):
     df_ml = df.copy()
 
-    # df_ml['count'] = np.log(df_ml['count'])
-    # df_ml['casual'] = np.log(df_ml['casual'])
-    # df_ml['registered'] = np.log(df_ml['registered'])
+    df_ml['count'] = np.log(df_ml['count'])
+    df_ml['casual'] = np.log(df_ml['casual'])
+    df_ml['registered'] = np.log(df_ml['registered'])
 
     cols = ['season', 'month', 'holiday', 'weekday', 'workingday', 'weather']
 
@@ -59,6 +59,9 @@ def train_reg(X_train, X_test, y_train, y_test, color):
     pred_test = model.predict(X_test)
 
     error = y_test - pred_test
+
+    error.pop(error.idxmin())
+    y_test = y_test.drop(error.idxmin())
 
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.scatter(y_test, error, color=color)
@@ -188,12 +191,10 @@ if __name__ == "__main__":
 
     if reg_type == "Non Linear Regression":
         algo = [(SVR(), "Support Vector Regression"),
-                (SVC(), "Support Vector Classification"),
                 (DecisionTreeRegressor(max_depth=8, min_samples_leaf=0.3),
                  "Decision Tree Regression")]
         available_algo = [
-            "Support Vector Regression", "Support Vector Classification",
-            "Decision Tree Regression"
+            "Support Vector Regression", "Decision Tree Regression"
         ]
     else:
         algo = [(LinearRegression(), "Linear Regression"),
