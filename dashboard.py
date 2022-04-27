@@ -28,7 +28,7 @@ def one_hot_encoding(data, column):
 
 @st.cache
 def format_df_for_ml(df):
-    df_ml = df
+    df_ml = df.copy()
 
     df_ml['count'] = np.log(df_ml['count'])
     df_ml['casual'] = np.log(df_ml['casual'])
@@ -65,11 +65,8 @@ def train_reg(X_train, X_test, y_train, y_test, color):
     return fig, pred_test
 
 
-if __name__ == "__main__":
-    # st.snow()
-
-    st.title("Dashboard - Graphics")
-
+@st.cache
+def import_data():
     df = pd.read_csv(os.path.join("data", "Capital_Bikeshare_data.csv"),
                      sep=";")
 
@@ -91,6 +88,34 @@ if __name__ == "__main__":
     cols = ['season', 'month', 'holiday', 'weekday', 'workingday', 'weather']
     for col in cols:
         df[col] = df[col].astype('category')
+
+    return df
+
+
+@st.cache
+def define_algorithms():
+    algo = [(LinearRegression(), "Linear Regression"),
+            (Ridge(), "Ridge Regression"), (Lasso(), "Lasso Regression"),
+            (ElasticNetCV(), "Elastic Net"),
+            (HuberRegressor(), "Huber Regression"),
+            (RandomForestRegressor(), "Random Forest Regression"),
+            (GradientBoostingRegressor(), "Gradient Boosting Regression"),
+            (ExtraTreesRegressor(), "Extra Trees Regression")]
+    available_algo = [
+        "Linear Regression", "Ridge Regression", "Lasso Regression",
+        "Elastic Net", "Huber Regression", "Random Forest Regression",
+        "Gradient Boosting Regression", "Extra Trees Regression"
+    ]
+
+    return algo, available_algo
+
+
+if __name__ == "__main__":
+    # st.snow()
+
+    st.title("Dashboard - Graphics")
+
+    df = import_data()
 
     st.subheader("Bikes rented per month and week day")
 
@@ -173,18 +198,7 @@ if __name__ == "__main__":
 
     st.title("Machine Learning")
 
-    algo = [(LinearRegression(), "Linear Regression"),
-            (Ridge(), "Ridge Regression"), (Lasso(), "Lasso Regression"),
-            (ElasticNetCV(), "Elastic Net"),
-            (HuberRegressor(), "Huber Regression"),
-            (RandomForestRegressor(), "Random Forest Regression"),
-            (GradientBoostingRegressor(), "Gradient Boosting Regression"),
-            (ExtraTreesRegressor(), "Extra Trees Regression")]
-    available_algo = [
-        "Linear Regression", "Ridge Regression", "Lasso Regression",
-        "Elastic Net", "Huber Regression", "Random Forest Regression",
-        "Gradient Boosting Regression", "Extra Trees Regression"
-    ]
+    algo, available_algo = define_algorithms()
     to_display = []
 
     alg_selection = st.multiselect("Select Algorithms", available_algo,
