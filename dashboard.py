@@ -13,6 +13,8 @@ from sklearn.model_selection import train_test_split
 
 st.set_page_config(layout="wide")
 
+st.snow()
+
 st.title("Dashboard - Graphics")
 
 df = pd.read_csv(os.path.join("data", "Capital_Bikeshare_data.csv"), sep=";")
