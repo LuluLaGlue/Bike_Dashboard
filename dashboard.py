@@ -10,7 +10,7 @@ from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Lasso, LinearRegression, Ridge, ElasticNetCV, HuberRegressor
+from sklearn.linear_model import Lasso, LinearRegression, RidgeCV, ElasticNetCV, HuberRegressor, BayesianRidge, SGDRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, ExtraTreesRegressor
 
 warnings.filterwarnings('ignore')
@@ -90,24 +90,6 @@ def import_data():
         df[col] = df[col].astype('category')
 
     return df
-
-
-@st.cache
-def define_algorithms():
-    algo = [(LinearRegression(), "Linear Regression"),
-            (Ridge(), "Ridge Regression"), (Lasso(), "Lasso Regression"),
-            (ElasticNetCV(), "Elastic Net"),
-            (HuberRegressor(), "Huber Regression"),
-            (RandomForestRegressor(), "Random Forest Regression"),
-            (GradientBoostingRegressor(), "Gradient Boosting Regression"),
-            (ExtraTreesRegressor(), "Extra Trees Regression")]
-    available_algo = [
-        "Linear Regression", "Ridge Regression", "Lasso Regression",
-        "Elastic Net", "Huber Regression", "Random Forest Regression",
-        "Gradient Boosting Regression", "Extra Trees Regression"
-    ]
-
-    return algo, available_algo
 
 
 if __name__ == "__main__":
@@ -198,17 +180,29 @@ if __name__ == "__main__":
 
     st.title("Machine Learning")
 
-    algo, available_algo = define_algorithms()
-    to_display = []
+    algo = [(LinearRegression(), "Linear Regression"),
+            (SGDRegressor(), "SDG Regression"),
+            (BayesianRidge(), "Bayesian Ridge Regression"),
+            (RidgeCV(), "Ridge Regression"), (Lasso(), "Lasso Regression"),
+            (ElasticNetCV(), "Elastic Net"),
+            (HuberRegressor(), "Huber Regression"),
+            (RandomForestRegressor(), "Random Forest Regression"),
+            (GradientBoostingRegressor(), "Gradient Boosting Regression"),
+            (ExtraTreesRegressor(), "Extra Trees Regression")]
+    available_algo = [
+        "Linear Regression", "SDG Regression", "Bayesian Ridge Regression",
+        "Ridge Regression", "Lasso Regression", "Elastic Net",
+        "Huber Regression", "Random Forest Regression",
+        "Gradient Boosting Regression", "Extra Trees Regression"
+    ]
 
     alg_selection = st.multiselect("Select Algorithms", available_algo,
                                    available_algo)
 
-    for a in alg_selection:
-        index = available_algo.index(a)
-        to_display.append(algo[index])
+    for title in alg_selection:
+        index = available_algo.index(title)
+        regression = algo[index][0]
 
-    for regression, title in to_display:
         st.header(title)
         co, re, ca = st.columns(3)
         with co:
