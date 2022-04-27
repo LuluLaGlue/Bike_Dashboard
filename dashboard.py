@@ -6,12 +6,14 @@ import seaborn as sns
 import streamlit as st
 import matplotlib.pyplot as plt
 
+from sklearn.svm import SVR, SVC
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Lasso, LinearRegression, RidgeCV, ElasticNetCV, HuberRegressor, BayesianRidge, SGDRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, ExtraTreesRegressor
+from sklearn.linear_model import Lasso, LinearRegression, RidgeCV, ElasticNetCV, HuberRegressor, BayesianRidge, SGDRegressor
 
 warnings.filterwarnings('ignore')
 st.set_page_config(layout="wide")
@@ -30,9 +32,9 @@ def one_hot_encoding(data, column):
 def format_df_for_ml(df):
     df_ml = df.copy()
 
-    df_ml['count'] = np.log(df_ml['count'])
-    df_ml['casual'] = np.log(df_ml['casual'])
-    df_ml['registered'] = np.log(df_ml['registered'])
+    # df_ml['count'] = np.log(df_ml['count'])
+    # df_ml['casual'] = np.log(df_ml['casual'])
+    # df_ml['registered'] = np.log(df_ml['registered'])
 
     cols = ['season', 'month', 'holiday', 'weekday', 'workingday', 'weather']
 
@@ -42,8 +44,9 @@ def format_df_for_ml(df):
     target_count = df_ml["count"]
     target_registered = df_ml["registered"]
     target_casual = df_ml["casual"]
-    df_ml = df_ml.drop(["atemp", "windspeed", "casual", "registered", "count"],
-                       axis=1)
+    df_ml = df_ml.drop(["casual", "registered", "count"], axis=1)
+
+    print(df_ml.head())
 
     return df_ml, target_count, target_casual, target_registered
 
@@ -56,6 +59,7 @@ def train_reg(X_train, X_test, y_train, y_test, color):
     pred_test = model.predict(X_test)
 
     error = y_test - pred_test
+
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.scatter(y_test, error, color=color)
     ax.axhline(lw=3, color='black')
@@ -179,22 +183,34 @@ if __name__ == "__main__":
         df)
 
     st.title("Machine Learning")
+    reg_type = st.selectbox("Select Regression Type",
+                            ("Linear Regression", "Non Linear Regression"))
 
-    algo = [(LinearRegression(), "Linear Regression"),
-            (SGDRegressor(), "SDG Regression"),
-            (BayesianRidge(), "Bayesian Ridge Regression"),
-            (RidgeCV(), "Ridge Regression"), (Lasso(), "Lasso Regression"),
-            (ElasticNetCV(), "Elastic Net"),
-            (HuberRegressor(), "Huber Regression"),
-            (RandomForestRegressor(), "Random Forest Regression"),
-            (GradientBoostingRegressor(), "Gradient Boosting Regression"),
-            (ExtraTreesRegressor(), "Extra Trees Regression")]
-    available_algo = [
-        "Linear Regression", "SDG Regression", "Bayesian Ridge Regression",
-        "Ridge Regression", "Lasso Regression", "Elastic Net",
-        "Huber Regression", "Random Forest Regression",
-        "Gradient Boosting Regression", "Extra Trees Regression"
-    ]
+    if reg_type == "Non Linear Regression":
+        algo = [(SVR(), "Support Vector Regression"),
+                (SVC(), "Support Vector Classification"),
+                (DecisionTreeRegressor(max_depth=8, min_samples_leaf=0.3),
+                 "Decision Tree Regression")]
+        available_algo = [
+            "Support Vector Regression", "Support Vector Classification",
+            "Decision Tree Regression"
+        ]
+    else:
+        algo = [(LinearRegression(), "Linear Regression"),
+                (SGDRegressor(), "SDG Regression"),
+                (BayesianRidge(), "Bayesian Ridge Regression"),
+                (RidgeCV(), "Ridge Regression"), (Lasso(), "Lasso Regression"),
+                (ElasticNetCV(), "Elastic Net"),
+                (HuberRegressor(), "Huber Regression"),
+                (RandomForestRegressor(), "Random Forest Regression"),
+                (GradientBoostingRegressor(), "Gradient Boosting Regression"),
+                (ExtraTreesRegressor(), "Extra Trees Regression")]
+        available_algo = [
+            "Linear Regression", "SDG Regression", "Bayesian Ridge Regression",
+            "Ridge Regression", "Lasso Regression", "Elastic Net",
+            "Huber Regression", "Random Forest Regression",
+            "Gradient Boosting Regression", "Extra Trees Regression"
+        ]
 
     alg_selection = st.multiselect("Select Algorithms", available_algo,
                                    available_algo)
@@ -209,6 +225,7 @@ if __name__ == "__main__":
             st.subheader("*Count*")
             X_train_count, X_test_count, y_train_count, y_test_count = train_test_split(
                 df_ml, target_count, test_size=0.25, random_state=42)
+
             fig_count, pred_test_count = train_reg(X_train_count, X_test_count,
                                                    y_train_count, y_test_count,
                                                    "green")
